@@ -6,9 +6,9 @@ BoxBlur, GaussianBlur, Bloom 을 단계적으로 적용하여 비교.
 
 ## Results Gallery
 
-| Original | BoxBlur | GaussianBlur | Bloom |
+| Original | Bloom | GaussianBlur | BoxBlur |
 |----------|---------|--------------|-------|
-| ![Original](images/lotte.jpeg) | ![BoxBlur](images/lotte_boxblur.png) | ![GaussianBlur](images/lotte_gaussianBlur.jpg) | ![Bloom](images/lotte_bloom.jpg) |
+| ![Original](images/lotte.jpeg) | ![BoxBlur](images/lotte_bloom.png) | ![GaussianBlur](images/lotte_gaussianBlur.png) | ![Bloom](images/lotte_boxblur.png) |
 
 ## Key Implementation
 
