@@ -8,7 +8,7 @@ BoxBlur, GaussianBlur, Bloom 을 단계적으로 적용하여 비교.
 
 | Original | Bloom | GaussianBlur | BoxBlur |
 |----------|---------|--------------|-------|
-| ![Original](images/lotte.jpeg) | ![BoxBlur](images/lotte_bloom.png) | ![GaussianBlur](images/lotte_gaussianBlur.png) | ![Bloom](images/lotte_boxblur.png) |
+| <img src="images/lotte.jpeg" width="200"> | <img src="images/lotte_bloom.png" width="200"> | <img src="images/lotte_gaussianBlur.png" width="200"> | <img src="images/lotte_boxblur.png" width="200"> |
 
 ## Key Implementation
 
