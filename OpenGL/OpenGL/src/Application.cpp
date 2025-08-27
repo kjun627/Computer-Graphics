@@ -1,13 +1,55 @@
-//http://glew.sourceforge.net/
-//»çÀÌÆ®¿¡¼­ GLEW ¹ÙÀÌ³Ê¸® ¹öÀü´Ù¿î·Îµå. ÇÊ¿ä ¶óÀÌºê·¯¸® dependencies¿¡ º¹»ç ÈÄ ¼³Á¤
+ï»¿//http://glew.sourceforge.net/
+//ì‚¬ì´íŠ¸ì—ì„œ GLEW ë°”ì´ë„ˆë¦¬ ë²„ì „ë‹¤ìš´ë¡œë“œ. í•„ìš” ë¼ì´ë¸ŒëŸ¬ë¦¬ dependenciesì— ë³µì‚¬ í›„ ì„¤ì •
 //http://glew.sourceforge.net/basic.html
-//¾Æ·¡ ¿¹Á¦ ÄÚµå½ÇÇà È®ÀÎ 
+//ì•„ë˜ ì˜ˆì œ ì½”ë“œì‹¤í–‰ í™•ì¸ 
 
-//GLEW_STATIC Define ÇÊ¿ä
-#include <GL/glew.h> //glfwº¸´Ù ¸ÕÀú includeÇØ¾ß ÇÔ
+//GLEW_STATIC Define í•„ìš”
+#include <GL/glew.h> //glfwë³´ë‹¤ ë¨¼ì € includeí•´ì•¼ í•¨
 #include <GLFW/glfw3.h>
 #include <iostream>
+static unsigned int Compileshader(unsigned int type, const std::string& source) {
+	unsigned int id = glCreateShader(type); //ì…°ì´ë” ê°ì²´ ìƒì„±
+	const char* src = source.c_str();
+	glShaderSource(id, // ì…°ì´ë”ì˜ ì†ŒìŠ¤ ì½”ë“œë¥¼ ëª…ì‹œ ,ì†ŒìŠ¤ ì½”ë“œë¥¼ ëª…ì‹œí•  ì…°ì´ë” ê°ì²´ì˜ ID
+		1, // ëª‡ê°œì˜ ì†ŒìŠ¤ ì½”ë“œë¥¼ ëª…ì‹œí•  ê²ƒì¸ì§€?
+		&src, // ì‹¤ì œ ì†ŒìŠ¤ ì½”ë“œê°€ ë“¤ì–´ìˆëŠ” ë¬¸ìì—´ì˜ ì£¼ì†Œê°’
+		nullptr); // í•´ë‹¹ ë¬¸ìì—´ ì „ì²´ë¥¼ ì‚¬ìš©í•  ê²½ìš° nullptr ì…ë ¥, ì•„ë‹ˆë¼ë©´ ê¸¸ì´ë¥¼ ëª…ì‹œí•´ì¤˜ì•¼í•¨
+	glCompileShader(id); // id ì— í•´ë‹¹í•˜ëŠ” ì…°ì´ë” ì»´íŒŒì¼
 
+	// ì—¬ê¸°ì„œë¶€í„°ëŠ” Error Handling (ì—†ìœ¼ë©´ í˜ë“¤ë‹¤ê³  í•¨)
+	int result;
+	glGetShaderiv(id, GL_COMPILE_STATUS, &result);
+	if (result == GL_FALSE) {
+		int length; // ê²°êµ­ì—” ë¡œê·¸ë¥¼ ì½ì–´ì˜¤ê¸° ìœ„í•œ ê³¼ì •
+		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length); // log ì˜ ê¸¸ì´ë¥¼ ì–»ì–´ì˜´
+		char* message = (char*)alloca(length * sizeof(char)); // stackì— ë™ì í• ë‹¹
+		glGetShaderInfoLog(id, length, &length, message); // ê¸¸ì´ë§Œí¼ logë¥¼ ì–»ì–´ì˜´
+		std::cout << "Shader Compile False" << (type == GL_VERTEX_SHADER ? "vertex" : "Fragment") << "\n";
+		std::cout << message << "\n";
+		glDeleteShader(id);
+		return 0;
+	}
+	return id;
+}
+static unsigned int Createshader(const std::string& vertexShader, const std::string& fragShader) {
+	unsigned int program = glCreateProgram();
+	unsigned int vs = Compileshader(GL_VERTEX_SHADER, vertexShader);
+	unsigned int fs = Compileshader(GL_FRAGMENT_SHADER, fragShader);
+
+	// ì»´íŒŒì¼ ëœ ì¼ì´ë” ì½”ë“œë¥¼ programì— ì¶”ê°€í•˜ê³  ë§í¬
+	glAttachShader(program, vs);
+	glAttachShader(program, fs);
+	glLinkProgram(program);
+	glValidateProgram(program);
+
+	// ì…°ì´ë” í”„ë¡œê·¸ë¨ì„ ìƒì„±í–ˆìœ¼ë¯€ë¡œ vs, fs ê°œë³„ í”„ë¡œê·¸ë¨ì€ ë”ì´ìƒ í•„ìš”ê°€ ì—†ì–´ì§„ë‹¤. -> ì‚­ì œ
+	glDeleteShader(vs);
+	glDeleteShader(fs);
+
+	return program;
+
+	// ê²°êµ­ vs, fsë¡œ programì„ í•˜ë‚˜ ì»´íŒŒì¼í•˜ê³  ì‚¬ìš©ëœ ë‘ê°œì˜ ì…°ì´ë”ëŠ” ì¢…ë£Œì‹œí‚¤ê³  ë§Œë“¤ì–´ì§„ í”„ë¡œê·¸ë¨ë§Œ ë¦¬í„´í•¨
+}
 int main(void)
 {
 	GLFWwindow* window;
@@ -25,58 +67,112 @@ int main(void)
 	}
 
 	/* Make the window's context current */
-	// GPU°¡ »ç¿ëÇÒ À©µµ¿ì¸¦ ÁöÁ¤ÇØÁÖ¾î¾ß ÇÔ.
-	// *Ãß°¡ : ÇÏ³ªÀÇ ÇÁ·Î±×·¥ÀÌ ¿©·¯ Ã¢À» °¡Áú ¼ö ÀÖ°í , °¢ Ã¢ ¸¶´Ù ´Ù¸¥ OpenGL »óÅÂ¸¦ °¡Áú ¼öµµ ÀÖÀ½.
+	// GPUê°€ ì‚¬ìš©í•  ìœˆë„ìš°ë¥¼ ì§€ì •í•´ì£¼ì–´ì•¼ í•¨.
+	// *ì¶”ê°€ : í•˜ë‚˜ì˜ í”„ë¡œê·¸ë¨ì´ ì—¬ëŸ¬ ì°½ì„ ê°€ì§ˆ ìˆ˜ ìˆê³  , ê° ì°½ ë§ˆë‹¤ ë‹¤ë¥¸ OpenGL ìƒíƒœë¥¼ ê°€ì§ˆ ìˆ˜ë„ ìˆìŒ.
 	glfwMakeContextCurrent(window);
 
-	// glfwMakeContextCurrent°¡ È£ÃâµÈ ÈÄ¿¡ glewInitÀÌ ¼öÇàµÇ¾î¾ß ÇÔ
-	//glew(Init) -> OpenGLÀ» »ç¿ëÇÏ±â À§ÇÑ ¶óÀÌºê·¯¸®
+	// glfwMakeContextCurrentê°€ í˜¸ì¶œëœ í›„ì— glewInitì´ ìˆ˜í–‰ë˜ì–´ì•¼ í•¨
+	//glew(Init) -> OpenGLì„ ì‚¬ìš©í•˜ê¸° ìœ„í•œ ë¼ì´ë¸ŒëŸ¬ë¦¬
 	if (glewInit() != GLEW_OK)
 	{
 		std::cout << "Error\n";
 	}
 
-	std::cout << glGetString(GL_VERSION) << std::endl; //³» ÇÃ·§ÆûÀÇ GL_Version Ãâ·ÂÇØº¸±â
+	std::cout << glGetString(GL_VERSION) << std::endl; //ë‚´ í”Œë«í¼ì˜ GL_Version ì¶œë ¥í•´ë³´ê¸°
 
-	// ÀÌ·±½ÄÀÇ Á¤º¸´Â Ram ¿¡ ÀúÀåµÊ.
+	// ì´ëŸ°ì‹ì˜ ì •ë³´ëŠ” Ram ì— ì €ì¥ë¨.
 	float position[6] = {
 		-0.5f,-0.5f,
 		 0.0f, 0.5f,
 		 0.5f,-0.5f
 	};
-	// µ¥ÀÌÅÍ¸¦ °¡Áö°í ÀÌ¹ÌÁö¸¦ ¸¸µå´Â °÷Àº GPU¿¡¼­ ÁøÇàÇÏ°Ô µÊ.
-	// µû¶ó¼­ GPU VRAMÀ¸·ÎÀÇ µ¥ÀÌÅÍ ÀüÈ¯ÀÌ ÇÊ¿äÇÏ´Ù.
+	// ë°ì´í„°ë¥¼ ê°€ì§€ê³  ì´ë¯¸ì§€ë¥¼ ë§Œë“œëŠ” ê³³ì€ GPUì—ì„œ ì§„í–‰í•˜ê²Œ ë¨.
+	// ë”°ë¼ì„œ GPU VRAMìœ¼ë¡œì˜ ë°ì´í„° ì „í™˜ì´ í•„ìš”í•˜ë‹¤.
 	
-	//GlgenBuffers(¸î°³ÀÇ ¹öÆÛ¸¦ »ı¼ºÇÒ Áö, »ı¼ºµÈ ID¸¦ ÀúÀåÇÒ º¯¼öÀÇ ÁÖ¼Ò)
+	//GlgenBuffers(ëª‡ê°œì˜ ë²„í¼ë¥¼ ìƒì„±í•  ì§€, ìƒì„±ëœ IDë¥¼ ì €ì¥í•  ë³€ìˆ˜ì˜ ì£¼ì†Œ)
 	//GlBindBuffer(GL_ARRAY_BUFFER,bufferID);
-	//GL_ARRAY_BUFFER -> ÀÌ ÆÛ¹ö´Â vertex µ¥ÀÌÅÍ¿ë¶ó°í OpenGL ¿¡°Ô ¼³¸í
-	// ´Ù¸¥ Á¾·ù ¿¹½Ã : GL_ELEMENT_ARRAY_BUFFER(ÀÎµ¦½º¿ë), GL_UNIFORM_BURRFER(uniform¿ë) µî
-	//GL_STATIC_DRAW -> ÀÌ µ¥ÀÌÅÍ´Â ÇÑ ¹ø ¼³Á¤ÇÏ°í ¿©·¯ ¹ø »ç¿ëÇÒ °Í
-	//GL_DYNAMIC_DRAW -> ÀÚÁÖ º¯°æµÉ °Í
-	//GL_STREAM_DRAW -> ÇÑ¹ø »ç¿ëÇÏ°í ¹ö¸± °Í
+	//GL_ARRAY_BUFFER -> ì´ í¼ë²„ëŠ” vertex ë°ì´í„°ìš©ë¼ê³  OpenGL ì—ê²Œ ì„¤ëª…
+	// ë‹¤ë¥¸ ì¢…ë¥˜ ì˜ˆì‹œ : GL_ELEMENT_ARRAY_BUFFER(ì¸ë±ìŠ¤ìš©), GL_UNIFORM_BURRFER(uniformìš©) ë“±
+	//GL_STATIC_DRAW -> ì´ ë°ì´í„°ëŠ” í•œ ë²ˆ ì„¤ì •í•˜ê³  ì—¬ëŸ¬ ë²ˆ ì‚¬ìš©í•  ê²ƒ
+	//GL_DYNAMIC_DRAW -> ìì£¼ ë³€ê²½ë  ê²ƒ
+	//GL_STREAM_DRAW -> í•œë²ˆ ì‚¬ìš©í•˜ê³  ë²„ë¦´ ê²ƒ
 	unsigned int bufferID;
 	glGenBuffers(1, &bufferID);
-	glBindBuffer(GL_ARRAY_BUFFER, bufferID); // bind ´Â activateÀÇ ¿ªÇÒÀ» ÇÔ ÀÌ·¸°Ô ÇÏ¸é buffer µ¥ÀÌÅÍÀÇ ¸ŞÅ¸ Á¤º¸´Â ÇÊ¿äÇÏÁö ¾Ê°Ô µÈ´Ù.
-	glBufferData(GL_ARRAY_BUFFER, // ½ÇÁ¦ CPU->GPU
+	glBindBuffer(GL_ARRAY_BUFFER, bufferID); // bind ëŠ” activateì˜ ì—­í• ì„ í•¨ ì´ë ‡ê²Œ í•˜ë©´ buffer ë°ì´í„°ì˜ ë©”íƒ€ ì •ë³´ëŠ” í•„ìš”í•˜ì§€ ì•Šê²Œ ëœë‹¤.
+	glBufferData(GL_ARRAY_BUFFER, // ì‹¤ì œ CPU->GPU
 				6 * sizeof(float),
 				position,
 				GL_STATIC_DRAW);
 
-	// ¸¹Àº ÀÛ¾÷À» ¾ÕÀ¸·Î ÀÌ While loop ¹® ¾È¿¡¼­ ÁøÇàÇÏ°Ô µÈ´Ù.
+	// ë°ì´í„° í•´ì„ ë²•?
+	glEnableVertexAttribArray(0); 
+	glVertexAttribPointer(0,
+		2, // í•˜ë‚˜ì˜ vertex ì— ëª‡ê°œì˜ ë°ì´í„°ë¥¼ ë„˜ê¸°ëŠ”ì§€ ex) 2ì°¨ì› ì¢Œí‘œëŠ” ë‘ê°œì˜ ê°’ì´ í•„ìš”
+		GL_FLOAT,
+		GL_FALSE,
+		sizeof(float) * 2, // float array ì—ì„œ read ì— ëŒ€í•œ offset 
+		0); // 0ë²ˆì§¸ index ë¶€í„° ì‹œì‘í•  ê²ƒ
+	
+	// if ì´ì „ì˜ ë°ì´í„°ë¥¼ 3D ë¡œ í™•ì¥í•œë‹¤ë©´?
+	//float position[9] = {
+	//	-0.5f,-0.5f,0.0f,
+	//	 0.0f, 0.5f,0.0f,
+	//	 0.5f,-0.5f,0.0f,
+	//};
+	//unsigned int bufferID;
+	//glGenBuffers(1, &bufferID);
+	//glBindBuffer(GL_ARRAY_BUFFER, bufferID); 
+	//glBufferData(GL_ARRAY_BUFFER, 
+	//	9 * sizeof(float),
+	//	position,
+	//	GL_STATIC_DRAW);
+	//glEnableVertexAttribArray(0);
+	//glVertexAttribPointer(0,
+	//	3, 
+	//	GL_FLOAT,
+	//	GL_FALSE,
+	//	sizeof(float) * 3,  
+	//	0); 
+
+	// Shader
+	std::string vertexShader =
+		"#version 330 core\n"
+		"\n"
+		"layout(location = 0 ) in vec4 position;" // ì—¬ê¸°ìˆëŠ” location = 0 ì´ ì½ì–´ì™€ì•¼í•  ë²„í¼? ì´ë‹¤.
+		"\n"
+		"void main()\n"
+		"{\n"
+		"   gl_Position = position;\n"
+		"}\n";
+
+	std::string fragShader =
+		"#version 330 core\n"
+		"\n"
+		"layout(location = 0) out vec4 color;"
+		"\n"
+		"void main()\n"
+		"{\n"
+		"   color = vec4(1.0,1.0,0.0,1.0);\n"
+		"}\n";
+	// shaderì˜ ì¸ë±ìŠ¤ë¥¼ ë°›ì•„ë‘  ( GPUì— ìˆëŠ” ì‰ì´ë”ì˜ ì£¼ì†Œë¥¼ CPUì— ì €ì¥)
+	unsigned int shader = Createshader(vertexShader, fragShader);
+	glUseProgram(shader); // activate == bineë‘ ê°œë…ì´ ë¹„ìŠ·í•¨ 
+
+	// ë§ì€ ì‘ì—…ì„ ì•ìœ¼ë¡œ ì´ While loop ë¬¸ ì•ˆì—ì„œ ì§„í–‰í•˜ê²Œ ëœë‹¤.
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
-		// glfw ¿Í gl ¶óÀÌºê·¯¸®´Â ´Ù¸£´Ù.
-		//rendering¿¡ °ü·ÃµÈ ÄÚµå´Â glÀ» »ç¿ëÇÏ°Ô µÉ °Í.
+		// glfw ì™€ gl ë¼ì´ë¸ŒëŸ¬ë¦¬ëŠ” ë‹¤ë¥´ë‹¤.
+		//renderingì— ê´€ë ¨ëœ ì½”ë“œëŠ” glì„ ì‚¬ìš©í•˜ê²Œ ë  ê²ƒ.
 
 		/* Render here */
-		// ¹İº¹¹® 1È¸´Â ÇÏ³ªÀÇ ÇÁ·¹ÀÓÀ» ¸¸µé°Ô µÇ´Âµ¥
-		// ¶§¹®¿¡ ÀÌÀü ÇÁ·¹ÀÓÀÇ Á¤º¸¸¦ Áö¿öÁà¾ßÇÔ.
+		// ë°˜ë³µë¬¸ 1íšŒëŠ” í•˜ë‚˜ì˜ í”„ë ˆì„ì„ ë§Œë“¤ê²Œ ë˜ëŠ”ë°
+		// ë•Œë¬¸ì— ì´ì „ í”„ë ˆì„ì˜ ì •ë³´ë¥¼ ì§€ì›Œì¤˜ì•¼í•¨.
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		// »ï°¢Çü ±×¸®´Â Legacy ÄÚµå Ãß°¡
-		// ´Ù¸¥ ÄÚµå¸¦ ÂüÁ¶ÇÒ ¶§ Glbegin , glend°¡ »ç¿ëµÈ ÄÚµå¶ó¸é ÂüÁ¶ÇÏÁö ¾Ê´Â °ÍÀÌ ÁÁÀ½
-		// -> ¿¾³¯ ÄÚµåµé
+		// ì‚¼ê°í˜• ê·¸ë¦¬ëŠ” Legacy ì½”ë“œ ì¶”ê°€
+		// ë‹¤ë¥¸ ì½”ë“œë¥¼ ì°¸ì¡°í•  ë•Œ Glbegin , glendê°€ ì‚¬ìš©ëœ ì½”ë“œë¼ë©´ ì°¸ì¡°í•˜ì§€ ì•ŠëŠ” ê²ƒì´ ì¢‹ìŒ
+		// -> ì˜›ë‚  ì½”ë“œë“¤
 		/*glBegin(GL_TRIANGLES);
 		glVertex2f(-0.5f, -0.5f);
 		glVertex2f( 0.0f,  0.5f);
@@ -84,21 +180,22 @@ int main(void)
 		glEnd();*/
 		
 		//glDrawArrays(GL_TRIANGLES, 0, 3)
-		//parameter1 = ±×¸± ¹æ½Ä (GL_TRIANGLES) 3°³¾¿ ¹­¾î¼­ »ï°¢Çü
-		//parameter2 = ½ÃÀÛ vertex ÀÎµ¦½º
-		//parameter3 = ±×¸± vertex °³¼ö
-		glDrawArrays(GL_TRIANGLES, 0, 3); // draw call -> µ¥ÀÌÅÍ¸¦ ³Ñ°å´Ù. ÇÏÁö¸¸ Shader·Î ¾î¶»°Ô ±×¸± °ÍÀÎÁö¿¡
-		// ´ëÇØ ¼³Á¤ÇØÁà¾ßÇÔ.
+		//parameter1 = ê·¸ë¦´ ë°©ì‹ (GL_TRIANGLES) 3ê°œì”© ë¬¶ì–´ì„œ ì‚¼ê°í˜•
+		//parameter2 = ì‹œì‘ vertex ì¸ë±ìŠ¤
+		//parameter3 = ê·¸ë¦´ vertex ê°œìˆ˜
+		glDrawArrays(GL_TRIANGLES, 0, 3); // draw call -> ë°ì´í„°ë¥¼ ë„˜ê²¼ë‹¤. í•˜ì§€ë§Œ Shaderë¡œ ì–´ë–»ê²Œ ê·¸ë¦´ ê²ƒì¸ì§€ì—
+		// ëŒ€í•´ ì„¤ì •í•´ì¤˜ì•¼í•¨.
 		/* Swap front and back buffers */	
 		glfwSwapBuffers(window);
 		// Swap buffer? 
-		// ÀÏÁ¾ÀÇ ¹öÆÛ¿¡µµ ¼ø¼­°¡ Á¸ÀçÇÏ°Ô µÈ´Ù. (ÇöÀç¿Í ¿¹ºñ?) 
-		// ¿¹ºñ ¹öÆÛÀÇ µ¥ÀÌÅÍ¸¦ ÇöÀç¿¡ Àü¼Û?
+		// ì¼ì¢…ì˜ ë²„í¼ì—ë„ ìˆœì„œê°€ ì¡´ì¬í•˜ê²Œ ëœë‹¤. (í˜„ì¬ì™€ ì˜ˆë¹„?) 
+		// ì˜ˆë¹„ ë²„í¼ì˜ ë°ì´í„°ë¥¼ í˜„ì¬ì— ì „ì†¡?
 
 		/* Poll for and process events */
 		glfwPollEvents();
 	}
-
+	// ì…°ì´ë”ëŠ” ë‹¤ì“°ë©´ ì •ë¦¬í•´ì¤„ê²ƒ
+	glDeleteShader(shader);
 	glfwTerminate();
 	return 0;
 }
