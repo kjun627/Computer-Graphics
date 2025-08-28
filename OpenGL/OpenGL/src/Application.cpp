@@ -119,7 +119,7 @@ int main(void)
 	};*/
 	// 데이터를 가지고 이미지를 만드는 곳은 GPU에서 진행하게 됨.
 	// 따라서 GPU VRAM으로의 데이터 전환이 필요하다.
-	
+
 	//GlgenBuffers(몇개의 버퍼를 생성할 지, 생성된 ID를 저장할 변수의 주소)
 	//GlBindBuffer(GL_ARRAY_BUFFER,bufferID);
 	//GL_ARRAY_BUFFER -> 이 퍼버는 vertex 데이터용라고 OpenGL 에게 설명
@@ -127,19 +127,30 @@ int main(void)
 	//GL_STATIC_DRAW -> 이 데이터는 한 번 설정하고 여러 번 사용할 것
 	//GL_DYNAMIC_DRAW -> 자주 변경될 것
 	//GL_STREAM_DRAW -> 한번 사용하고 버릴 것
-	unsigned int bufferID;
+	
 	// if 이전의 데이터를 3D 로 확장한다면?
-	float position[9] = {
-		-0.5f,-0.5f,0.0f,
-		 0.0f, 0.5f,0.0f,
-		 0.5f, -0.5f,0.0f,
+	float position[] = {
+		-0.5f,-0.5f,0.0f, // 0 vertex
+		 0.5f, -0.5f,0.0f, // 1
+		 0.5f, 0.5f,0.0f, // 2
+		-0.5f, 0.5f,0.0f //3
 	};
+
+	unsigned int indices[] = {
+		0, 1, 2, // t1
+		2, 3, 0 //t2
+	};
+	unsigned int bufferID;
 	glGenBuffers(1, &bufferID);
 	glBindBuffer(GL_ARRAY_BUFFER, bufferID); // bind 는 activate의 역할을 함 이렇게 하면 buffer 데이터의 메타 정보는 필요하지 않게 된다.
 	glBufferData(GL_ARRAY_BUFFER, // 실제 CPU->GPU
-				9* sizeof(float),
+				12* sizeof(float),
 				position,
 				GL_STATIC_DRAW);
+	unsigned int ibo; //index buffer object
+	glGenBuffers(1, &ibo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
 
 	// 데이터 해석 법?
 	glEnableVertexAttribArray(0); 
@@ -149,22 +160,7 @@ int main(void)
 		GL_FALSE,
 		sizeof(float) * 3, // float array 에서 read 에 대한 offset 
 		0); // 0번째 index 부터 시작할 것
-	
-	
-	//unsigned int bufferID;
-	//glGenBuffers(1, &bufferID);
-	//glBindBuffer(GL_ARRAY_BUFFER, bufferID); 
-	//glBufferData(GL_ARRAY_BUFFER, 
-	//	9 * sizeof(float),
-	//	position,
-	//	GL_STATIC_DRAW);
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(0,
-	//	3, 
-	//	GL_FLOAT,
-	//	GL_FALSE,
-	//	sizeof(float) * 3,  
-	//	0); 
+	 
 
 /*	unsigned int shader = Createshader(vertexShader, fragShader);
 	glUseProgram(shader)*/; // activate == bine랑 개념이 비슷함 
@@ -196,11 +192,9 @@ int main(void)
 		glEnd();*/
 		/*glUseProgram(0);*/ // 이게 ACTIVATE 의 반대 de activate의 역할임
 
-		//glDrawArrays(GL_TRIANGLES, 0, 3)
-		//parameter1 = 그릴 방식 (GL_TRIANGLES) 3개씩 묶어서 삼각형
-		//parameter2 = 시작 vertex 인덱스
-		//parameter3 = 그릴 vertex 개수
-		glDrawArrays(GL_TRIANGLES, 0, 3); // draw call -> 데이터를 넘겼다. 하지만 Shader로 어떻게 그릴 것인지에
+		glDrawElements(GL_TRIANGLES, 6, // ibo 를 이용하여 그릴때는 draw call 을 사용하지 않는다? 대신 사용하는 함수
+			GL_UNSIGNED_INT,
+			nullptr);
 		// 대해 설정해줘야함.
 		/* Swap front and back buffers */	
 		glfwSwapBuffers(window);
