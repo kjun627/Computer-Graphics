@@ -7,6 +7,14 @@
 #include <GL/glew.h> //glfw보다 먼저 include해야 함
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+
+struct ShaderProgramSource {
+	std::string VertexSource;
+	std::string FragSource;
+};
 static unsigned int Compileshader(unsigned int type, const std::string& source) {
 	unsigned int id = glCreateShader(type); //셰이더 객체 생성
 	const char* src = source.c_str();
@@ -22,7 +30,7 @@ static unsigned int Compileshader(unsigned int type, const std::string& source) 
 	if (result == GL_FALSE) {
 		int length; // 결국엔 로그를 읽어오기 위한 과정
 		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length); // log 의 길이를 얻어옴
-		char* message = (char*)alloca(length * sizeof(char)); // stack에 동적할당
+		char* message = (char*)_malloca(length * sizeof(char)); // stack에 동적할당
 		glGetShaderInfoLog(id, length, &length, message); // 길이만큼 log를 얻어옴
 		std::cout << "Shader Compile False" << (type == GL_VERTEX_SHADER ? "vertex" : "Fragment") << "\n";
 		std::cout << message << "\n";
@@ -31,7 +39,7 @@ static unsigned int Compileshader(unsigned int type, const std::string& source) 
 	}
 	return id;
 }
-static unsigned int Createshader(const std::string& vertexShader, const std::string& fragShader) {
+static unsigned int CreateShader(const std::string& vertexShader, const std::string& fragShader) {
 	unsigned int program = glCreateProgram();
 	unsigned int vs = Compileshader(GL_VERTEX_SHADER, vertexShader);
 	unsigned int fs = Compileshader(GL_FRAGMENT_SHADER, fragShader);
@@ -49,6 +57,29 @@ static unsigned int Createshader(const std::string& vertexShader, const std::str
 	return program;
 
 	// 결국 vs, fs로 program을 하나 컴파일하고 사용된 두개의 셰이더는 종료시키고 만들어진 프로그램만 리턴함
+}
+static ShaderProgramSource ParseShader(const std::string& filepath) {
+	std::ifstream stream(filepath);
+	enum class ShaderType {
+		NONE = -1, VERTEX = 0, FRAGMENT = 1
+	};
+	std::string line;
+	std::stringstream ss[2];
+	ShaderType type = ShaderType::NONE;
+	while(getline(stream, line)) {
+		if (line.find("#shader") != std::string::npos) {
+			if (line.find("vertex") != std::string::npos) { // vertex shader
+				type = ShaderType::VERTEX;
+			}
+			else if (line.find("fragment") != std::string::npos) {// fragment shader
+				type = ShaderType::FRAGMENT;
+			}
+		}
+		else {
+			ss[(int)type] << line << '\n'; // ZHEMFMF string streamdp tkqdlq
+		}
+	 }
+	return { ss[0].str(), ss[1].str() };
 }
 int main(void)
 {
@@ -81,11 +112,11 @@ int main(void)
 	std::cout << glGetString(GL_VERSION) << std::endl; //내 플랫폼의 GL_Version 출력해보기
 
 	// 이런식의 정보는 Ram 에 저장됨.
-	float position[6] = {
+	/*float position[6] = {
 		-0.5f,-0.5f,
 		 0.0f, 0.5f,
 		 0.5f,-0.5f
-	};
+	};*/
 	// 데이터를 가지고 이미지를 만드는 곳은 GPU에서 진행하게 됨.
 	// 따라서 GPU VRAM으로의 데이터 전환이 필요하다.
 	
@@ -97,28 +128,29 @@ int main(void)
 	//GL_DYNAMIC_DRAW -> 자주 변경될 것
 	//GL_STREAM_DRAW -> 한번 사용하고 버릴 것
 	unsigned int bufferID;
+	// if 이전의 데이터를 3D 로 확장한다면?
+	float position[9] = {
+		-0.5f,-0.5f,0.0f,
+		 0.0f, 0.5f,0.0f,
+		 0.5f, -0.5f,0.0f,
+	};
 	glGenBuffers(1, &bufferID);
 	glBindBuffer(GL_ARRAY_BUFFER, bufferID); // bind 는 activate의 역할을 함 이렇게 하면 buffer 데이터의 메타 정보는 필요하지 않게 된다.
 	glBufferData(GL_ARRAY_BUFFER, // 실제 CPU->GPU
-				6 * sizeof(float),
+				9* sizeof(float),
 				position,
 				GL_STATIC_DRAW);
 
 	// 데이터 해석 법?
 	glEnableVertexAttribArray(0); 
 	glVertexAttribPointer(0,
-		2, // 하나의 vertex 에 몇개의 데이터를 넘기는지 ex) 2차원 좌표는 두개의 값이 필요
+		3, // 하나의 vertex 에 몇개의 데이터를 넘기는지 ex) 2차원 좌표는 두개의 값이 필요
 		GL_FLOAT,
 		GL_FALSE,
-		sizeof(float) * 2, // float array 에서 read 에 대한 offset 
+		sizeof(float) * 3, // float array 에서 read 에 대한 offset 
 		0); // 0번째 index 부터 시작할 것
 	
-	// if 이전의 데이터를 3D 로 확장한다면?
-	//float position[9] = {
-	//	-0.5f,-0.5f,0.0f,
-	//	 0.0f, 0.5f,0.0f,
-	//	 0.5f,-0.5f,0.0f,
-	//};
+	
 	//unsigned int bufferID;
 	//glGenBuffers(1, &bufferID);
 	//glBindBuffer(GL_ARRAY_BUFFER, bufferID); 
@@ -134,29 +166,13 @@ int main(void)
 	//	sizeof(float) * 3,  
 	//	0); 
 
-	// Shader
-	std::string vertexShader =
-		"#version 330 core\n"
-		"\n"
-		"layout(location = 0 ) in vec4 position;" // 여기있는 location = 0 이 읽어와야할 버퍼? 이다.
-		"\n"
-		"void main()\n"
-		"{\n"
-		"   gl_Position = position;\n"
-		"}\n";
+/*	unsigned int shader = Createshader(vertexShader, fragShader);
+	glUseProgram(shader)*/; // activate == bine랑 개념이 비슷함 
 
-	std::string fragShader =
-		"#version 330 core\n"
-		"\n"
-		"layout(location = 0) out vec4 color;"
-		"\n"
-		"void main()\n"
-		"{\n"
-		"   color = vec4(1.0,1.0,0.0,1.0);\n"
-		"}\n";
-	// shader의 인덱스를 받아둠 ( GPU에 있는 쉐이더의 주소를 CPU에 저장)
-	unsigned int shader = Createshader(vertexShader, fragShader);
-	glUseProgram(shader); // activate == bine랑 개념이 비슷함 
+
+	ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
+	unsigned int shader = CreateShader(source.VertexSource, source.FragSource);
+	glUseProgram(shader);
 
 	// 많은 작업을 앞으로 이 While loop 문 안에서 진행하게 된다.
 	/* Loop until the user closes the window */
@@ -169,7 +185,7 @@ int main(void)
 		// 반복문 1회는 하나의 프레임을 만들게 되는데
 		// 때문에 이전 프레임의 정보를 지워줘야함.
 		glClear(GL_COLOR_BUFFER_BIT);
-
+		
 		// 삼각형 그리는 Legacy 코드 추가
 		// 다른 코드를 참조할 때 Glbegin , glend가 사용된 코드라면 참조하지 않는 것이 좋음
 		// -> 옛날 코드들
@@ -178,7 +194,8 @@ int main(void)
 		glVertex2f( 0.0f,  0.5f);
 		glVertex2f( 0.5f, -0.5f);
 		glEnd();*/
-		
+		/*glUseProgram(0);*/ // 이게 ACTIVATE 의 반대 de activate의 역할임
+
 		//glDrawArrays(GL_TRIANGLES, 0, 3)
 		//parameter1 = 그릴 방식 (GL_TRIANGLES) 3개씩 묶어서 삼각형
 		//parameter2 = 시작 vertex 인덱스
