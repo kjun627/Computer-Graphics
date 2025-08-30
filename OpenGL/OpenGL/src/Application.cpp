@@ -11,6 +11,27 @@
 #include <string>
 #include <sstream>
 
+#define ASSERT(x) if ((!x)) __debugbreak();
+#define GLCall(x) GLClearError();\
+				  x;\
+				  ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+
+//glGetError 는 에러를 하나씩만 반환 ->한번 확인에 모든 오류를 봐야함
+//기본적으로 gpu 연산에서 발생하는 오류 자체도 gpu(vram) 에 저장되어있음-> cpu side로 
+//오류 전달 필요
+
+static void GLClearError() {
+	while (glGetError() != GL_NO_ERROR);
+}
+static bool GLLogCall(const char* function, const char* file, int line) {
+	while (GLenum error = glGetError()) { // 결국 glGetError 로 어떤 오류가 발생했는지 알 수 있다.
+		std::cout << "[OpenGL Error] (" << error << ") : " << function <<
+			" " << file << " in line " << line << std::endl;
+		return false;
+	}
+	return true;
+}
+
 struct ShaderProgramSource {
 	std::string VertexSource;
 	std::string FragSource;
@@ -168,7 +189,7 @@ int main(void)
 
 	ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
 	unsigned int shader = CreateShader(source.VertexSource, source.FragSource);
-	glUseProgram(shader);
+	GLCall(glUseProgram(shader));
 
 	// 많은 작업을 앞으로 이 While loop 문 안에서 진행하게 된다.
 	/* Loop until the user closes the window */
@@ -178,7 +199,7 @@ int main(void)
 		//rendering에 관련된 코드는 gl을 사용하게 될 것.
 
 		/* Render here */
-		// 반복문 1회는 하나의 프레임을 만들게 되는데
+		// 반복문 1 회는 하나의 프레임을 만들게 되는데
 		// 때문에 이전 프레임의 정보를 지워줘야함.
 		glClear(GL_COLOR_BUFFER_BIT);
 		
@@ -192,12 +213,14 @@ int main(void)
 		glEnd();*/
 		/*glUseProgram(0);*/ // 이게 ACTIVATE 의 반대 de activate의 역할임
 
-		glDrawElements(GL_TRIANGLES, 6, // ibo 를 이용하여 그릴때는 draw call 을 사용하지 않는다? 대신 사용하는 함수
-			GL_UNSIGNED_INT,
-			nullptr);
+		GLCall(glDrawElements(GL_TRIANGLES, 6, // ibo 를 이용하여 그릴때는 draw call 을 사용하지 않는다? 대신 사용하는 함수
+					   GL_UNSIGNED_INT,
+					   nullptr)); // openGL 명령어를 GLCall 의 인자로 넘겨주면
+		// 해당 함수 실행되는 과정에서 발생하는 오류를 콘솔창에 출력
+		
 		// 대해 설정해줘야함.
 		/* Swap front and back buffers */	
-		glfwSwapBuffers(window);
+		GLCall(glfwSwapBuffers(window));
 		// Swap buffer? 
 		// 일종의 버퍼에도 순서가 존재하게 된다. (현재와 예비?) 
 		// 예비 버퍼의 데이터를 현재에 전송?
