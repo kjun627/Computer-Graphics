@@ -1,2 +1,16 @@
+/gitignore
+# Visual Studio
+*.ipch
+*.pch
+.vs/
+Release/
+x64/
+x86/
+*.user
+*.suo
+*.sdf
+*.opensdf
+*.db
+*.opendb
 OpenGL/.vs/
 Debug/
