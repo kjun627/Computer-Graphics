@@ -13,7 +13,7 @@ This repository contains projects and examples for exploring modern computer gra
 ## Certification
 
 <p align="center">
-  <img src="./certification/certification_1.png" alt="Certification" width="400"/>
+  <img src="./certification/certification_1.jpg" alt="Certification" width="400"/>
 </p>
 
 ## License
