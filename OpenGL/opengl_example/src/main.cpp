@@ -1,7 +1,4 @@
-#include "common.h"
-#include "shader.h"
-#include "program.h"
-
+#include "context.h"
 #include <spdlog/spdlog.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -65,7 +62,13 @@ int main(int argc , const char** argv){
     // 그래서 아래와 같이 로그 출력해야함.
     SPDLOG_INFO("OpenGL context version: {}", 
     reinterpret_cast<const char*>(glVersion));
-
+    
+    auto context = Context::Create();
+    if(!context){
+        SPDLOG_ERROR("failed to create context");
+        glfwTerminate();
+        return -1;
+    }
     ShaderPtr vertexShader = Shader::CreateFromFile("./shader/simple.vs", GL_VERTEX_SHADER);
     ShaderPtr fragmentShader = Shader::CreateFromFile("./shader/simple.fs", GL_FRAGMENT_SHADER);
     SPDLOG_INFO("vertex shader id: {}", vertexShader->Get());
@@ -83,11 +86,11 @@ int main(int argc , const char** argv){
     SPDLOG_INFO("Start main loop");
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
-        glClearColor(0.0f, 0.1f, 0.2f,0.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        context->Render();
         glfwSwapBuffers(window);
     }
-
+    context.reset();
+    //context = nullptr;
     glfwTerminate();
     return 0;
 }
