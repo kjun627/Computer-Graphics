@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(PROJECT_NAME First_Opengl_example)
+set(PROJECT_NAME opengl_example)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(WINDOW_NAME "First_Opengl_example")
+set(WINDOW_NAME "Opengl_example")
 set(WINDOW_WIDTH 960)
 set(WINDOW_HEIGHT 540)
 
@@ -11,6 +12,8 @@ project(${PROJECT_NAME})
 add_executable(${PROJECT_NAME} 
     src/main.cpp
     src/glad.c
+    src/common.cpp src/common.h
+    src/shader.cpp src/shader.h
 )
 include(Dependency.cmake)
 
