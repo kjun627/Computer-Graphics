@@ -11,6 +11,21 @@ project(${PROJECT_NAME})
 add_executable(${PROJECT_NAME} src/main.cpp)
 include(Dependency.cmake)
 
+
+if(APPLE)
+    find_library(COCOA_LIBRARY Cocoa REQUIRED)
+    find_library(IOKIT_LIBRARY IOKit REQUIRED)
+    find_library(COREVIDEO_LIBRARY CoreVideo REQUIRED)
+    find_library(COREFOUNDATION_LIBRARY CoreFoundation REQUIRED)
+    
+    set(DEP_LIBS ${DEP_LIBS}
+        ${COCOA_LIBRARY}
+        ${IOKIT_LIBRARY}
+        ${COREVIDEO_LIBRARY}
+        ${COREFOUNDATION_LIBRARY}
+    )
+endif()
+
 # 프로젝트에 include / lib 관련 옵션 추가
 target_include_directories(${PROJECT_NAME} PUBLIC ${DEP_INCLUDE_DIR})
 target_link_directories(${PROJECT_NAME} PUBLIC ${DEP_LIB_DIR})
