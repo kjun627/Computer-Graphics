@@ -8,7 +8,10 @@ set(WINDOW_WIDTH 960)
 set(WINDOW_HEIGHT 540)
 
 project(${PROJECT_NAME})
-add_executable(${PROJECT_NAME} src/main.cpp)
+add_executable(${PROJECT_NAME} 
+    src/main.cpp
+    src/glad.c
+)
 include(Dependency.cmake)
 
 
@@ -27,7 +30,9 @@ if(APPLE)
 endif()
 
 # 프로젝트에 include / lib 관련 옵션 추가
-target_include_directories(${PROJECT_NAME} PUBLIC ${DEP_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} 
+    PUBLIC ${DEP_INCLUDE_DIR}
+    PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_link_directories(${PROJECT_NAME} PUBLIC ${DEP_LIB_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${DEP_LIBS})
 
