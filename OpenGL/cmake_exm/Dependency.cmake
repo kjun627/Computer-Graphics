@@ -27,3 +27,21 @@ ExternalProject_Add(
 set(DEP_LIST ${DEP_LIST} dep-spdlog)
 set(DEP_LIBS ${DEP_LIBS} spdlog$<$<CONFIG:Debug>:d>)
 # set(DEP_LIBS ${DEP_LIBS} spdlog)
+
+ExternalProject_Add(
+    dep_glfw
+    GIT_REPOSITORY "https://github.com/glfw/glfw.git"
+    GIT_TAG "3.4"
+    GIT_SHALLOW 1
+    UPDATE_COMMAND "" 
+    PATCH_COMMAND "" 
+    TEST_COMMAND ""
+    CMAKE_ARGS
+        -DCMAKE_INSTALL_PREFIX=${DEP_INSTALL_DIR}
+        -DGLFW_BUILD_EXAMPLES=OFF
+        -DGLFW_BUILD_TESTS=OFF
+        -DGLFW_BUILD_DOCS=OFF
+)
+
+set(DEP_LIST ${DEP_LIST} dep_glfw)
+set(DEP_LIBS ${DEP_LIBS} glfw3)
