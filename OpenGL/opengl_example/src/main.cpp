@@ -1,5 +1,6 @@
 #include "common.h"
 #include "shader.h"
+#include "program.h"
 
 #include <spdlog/spdlog.h>
 #include <glad/glad.h>
@@ -65,10 +66,13 @@ int main(int argc , const char** argv){
     SPDLOG_INFO("OpenGL context version: {}", 
     reinterpret_cast<const char*>(glVersion));
 
-    auto vertexShader = Shader::CreateFromFile("./shader/simple.vs", GL_VERTEX_SHADER);
-    auto fragmentShader = Shader::CreateFromFile("./shader/simple.fs", GL_FRAGMENT_SHADER);
+    ShaderPtr vertexShader = Shader::CreateFromFile("./shader/simple.vs", GL_VERTEX_SHADER);
+    ShaderPtr fragmentShader = Shader::CreateFromFile("./shader/simple.fs", GL_FRAGMENT_SHADER);
     SPDLOG_INFO("vertex shader id: {}", vertexShader->Get());
     SPDLOG_INFO("fragment shader id: {}", fragmentShader->Get());
+    
+    auto program = Program::Create({fragmentShader, vertexShader});
+    SPDLOG_INFO("program id: {}", program->Get());
     
     // 최초의 frame 정보를 호출하지 않기 때문에 최소 로그를 위한 실행
     OnFramebufferSizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT);
