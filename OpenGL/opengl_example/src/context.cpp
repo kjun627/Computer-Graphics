@@ -13,7 +13,11 @@ bool Context::Init(){
     float vertices[] = {
         -0.5f, -0.5f, 0.0f,
         0.5f, -0.5f, 0.0f,
-        0.0f, 0.5f, 0.0f,
+        0.5f, 0.5f, 0.0f,
+
+        -0.5f, -0.5f, 0.0f,
+        0.5f, 0.5f, 0.0f,
+        -0.5, 0.5, 0.0f,
     };
 
     // 버퍼 오브젝트 만들기 전에 VAO를 만들기
@@ -26,10 +30,10 @@ bool Context::Init(){
     glGenBuffers(1, &m_vertexBuffer);
     // Array_Buffer 에 m_vertexBuffer 가 가진 아이디를 바인딩 -> GL_Array_Buffer 라는 이름으로 VBO를 사용가능
     glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
-    // Array_Buffer에 float형 데이터 vertex 9개를 삽입하겠다. 그리고 그 정보는 vertice의 데이터이다.
+    // Array_Buffer에 float형 데이터 vertex 18개(사각형)를 삽입하겠다. 그리고 그 정보는 vertice의 데이터이다.
     // GL_STATIC_DRAW -> 한번 설정하고 여러번 사용
     // ( STATIC, DYNAMIC, STREAM ) * (DRAW, COPY , READ) 의 조합으로 사용 가능 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 9 , vertices,GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 18 , vertices,GL_STATIC_DRAW);
 
     // 특정 Vertex Attribute를 활성화
     // vertex shader의 location 
@@ -61,5 +65,5 @@ void Context::Render(){
     glClear(GL_COLOR_BUFFER_BIT);
 
     glUseProgram(m_program->Get());
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 }
