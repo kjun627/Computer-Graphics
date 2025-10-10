@@ -4,6 +4,8 @@
 #include "common.h"
 #include "shader.h"
 #include "program.h"
+#include "buffer.h"
+
 CLASS_PTR(Context)
 class Context{
 public:
@@ -14,11 +16,9 @@ private:
     bool Init();
     ProgramUPtr m_program;
 
-    // VBO 를 담아둘 uint32_t
-    uint32_t m_vertexBuffer;
     // VAO 를 담아둘 uint32_t
     uint32_t m_vertexArrayObject;
-    // index buffer를 위한 uint32_t
-    uint32_t m_indexBuffer;
+    BufferUPtr m_vertexBuffer;
+    BufferUPtr m_indexBuffer;
 };
 #endif
