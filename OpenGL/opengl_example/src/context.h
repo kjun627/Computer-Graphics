@@ -13,5 +13,10 @@ private:
     Context(){}
     bool Init();
     ProgramUPtr m_program;
+
+    // VBO 를 담아둘 uint32_t
+    uint32_t m_vertexBuffer;
+    // VAO 를 담아둘 uint32_t
+    uint32_t m_vertexArrayObject;
 };
 #endif
