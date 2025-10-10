@@ -5,6 +5,7 @@
 #include "shader.h"
 #include "program.h"
 #include "buffer.h"
+#include "vertex_layout.h"
 
 CLASS_PTR(Context)
 class Context{
@@ -16,8 +17,7 @@ private:
     bool Init();
     ProgramUPtr m_program;
 
-    // VAO 를 담아둘 uint32_t
-    uint32_t m_vertexArrayObject;
+    VertexLayoutUPtr m_vertexLayout;
     BufferUPtr m_vertexBuffer;
     BufferUPtr m_indexBuffer;
 };
