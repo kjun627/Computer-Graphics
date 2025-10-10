@@ -14,10 +14,11 @@ bool Context::Init(){
         -0.5f, -0.5f, 0.0f,
         0.5f, -0.5f, 0.0f,
         0.5f, 0.5f, 0.0f,
-
-        -0.5f, -0.5f, 0.0f,
-        0.5f, 0.5f, 0.0f,
         -0.5, 0.5, 0.0f,
+    };
+    uint32_t indices[] = {
+        0, 1, 3,
+        1, 2, 3,
     };
 
     // 버퍼 오브젝트 만들기 전에 VAO를 만들기
@@ -33,7 +34,7 @@ bool Context::Init(){
     // Array_Buffer에 float형 데이터 vertex 18개(사각형)를 삽입하겠다. 그리고 그 정보는 vertice의 데이터이다.
     // GL_STATIC_DRAW -> 한번 설정하고 여러번 사용
     // ( STATIC, DYNAMIC, STREAM ) * (DRAW, COPY , READ) 의 조합으로 사용 가능 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 18 , vertices,GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 12 , vertices,GL_STATIC_DRAW);
 
     // 특정 Vertex Attribute를 활성화
     // vertex shader의 location 
@@ -43,6 +44,13 @@ bool Context::Init(){
     // attribute 위치(위에랑 동일) , 컴포넌트 개수(한 vertex당 몇개의 값을 가지는지 vector의 차원(?)), 
     // 데이터 타입, 정규화 여부 , 스트라이드, 오프셋 순서의 파라미터
     glVertexAttribPointer(0,3,GL_FLOAT, GL_FALSE, sizeof(float)* 3, 0);
+
+    // 하나의 버퍼아이디를 부여 받아서
+    glGenBuffers(1, &m_indexBuffer);
+    // 부여받은 버퍼아이디를 인덱스 버퍼로 바인딩하고
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer);
+    // 인덱스 버퍼로  indices 에 담겨있었던 데이터들을 복사한다.
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t)* 6, indices, GL_STATIC_DRAW);
 
     ShaderPtr vertShader = Shader::CreateFromFile("./shader/simple.vs", GL_VERTEX_SHADER);
     ShaderPtr fragShader = Shader::CreateFromFile("./shader/simple.fs", GL_FRAGMENT_SHADER);
@@ -65,5 +73,7 @@ void Context::Render(){
     glClear(GL_COLOR_BUFFER_BIT);
 
     glUseProgram(m_program->Get());
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    // glDrawArrays(GL_TRIANGLES, 0, 6);
+    //indexBuffer 를 사용하여 Draw 할 때는 다음 함수 사용
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
