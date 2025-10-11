@@ -47,6 +47,12 @@ bool Context::Init(){
         return false;
     }
     SPDLOG_INFO("program id: {}", m_program->Get());
+
+    // fragment shader에서 설정한 uniform qulifier 의 handle 획득
+    auto loc = glGetUniformLocation(m_program->Get(), "color");
+    m_program->Use();
+    // handle 을 얻은 직후에는 이런식으로 모든 vertex가 가지는 uniform value 를 control
+    glUniform4f(loc, 1.0f, 1.0f, 0.0f,1.0f);
     glClearColor(0.0f, 0.1f, 0.2f,0.0f);
 
     return true;
@@ -54,9 +60,13 @@ bool Context::Init(){
 
 void Context::Render(){
     glClear(GL_COLOR_BUFFER_BIT);
-
+    static float time = 0.0f;
+    float t = sinf(time) * 0.5f + 0.5f; // sin (time) 값에 0.5를 곱하고 + 0.5를 하는 방식 -> 최대 1 , 최소값 0
+    auto loc = glGetUniformLocation(m_program->Get(), "color");
     m_program->Use();
+    glUniform4f(loc, t*t, 2.0f*t*(1.0f-t), (1.0f-t)*(1.0f-t), 1.0f);
     // glDrawArrays(GL_TRIANGLES, 0, 6);
     //indexBuffer 를 사용하여 Draw 할 때는 다음 함수 사용
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    time += 0.016f;
 }
