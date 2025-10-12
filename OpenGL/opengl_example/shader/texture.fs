@@ -7,5 +7,5 @@ out vec4 fragColor;
 uniform sampler2D tex;
 void main() {
     vec4 texColor = texture(tex, texCoord);
-    fragColor = texColor * vertexColor;
+    fragColor = texColor;
 }
