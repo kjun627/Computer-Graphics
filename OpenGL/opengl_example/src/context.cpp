@@ -53,15 +53,29 @@ bool Context::Init(){
 
     glClearColor(0.0f, 0.1f, 0.2f,0.0f);
 
-    // auto image = Image::Load("./IMG_sample/container.jpg");
-    // if(!image){
-    //     return false;
-    // }
-    // SPDLOG_INFO("image: {}x{}, {} channels", 
-    //     image->GetWidth(), image->GetHight(), image->GetChannelCount());
-    auto image = Image::Create(512, 512);
-    image->SetCheckImage(16, 16);
+    auto image = Image::Load("./IMG_sample/container.jpg");
+    if(!image){
+        return false;
+    }
+    SPDLOG_INFO("image: {}x{}, {} channels", 
+        image->GetWidth(), image->GetHight(), image->GetChannelCount());
     m_texture = Texture::CreateFromImage(image.get());
+
+    auto image2 = Image::Load("./IMG_sample/awesomeface.png");
+    if(!image2)
+        return false;
+    SPDLOG_INFO("image: {}x{}, {} channels", 
+        image2->GetWidth(), image2->GetHight(), image2->GetChannelCount());
+    m_texture2 = Texture::CreateFromImage(image2.get());
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_texture->Get());
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, m_texture2->Get());
+
+    m_program->Use();
+    glUniform1i(glGetUniformLocation(m_program->Get(), "tex"),0);
+    glUniform1i(glGetUniformLocation(m_program->Get(), "tex2"),1);
     return true;
 }
 
