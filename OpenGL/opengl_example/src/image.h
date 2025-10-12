@@ -7,6 +7,7 @@ CLASS_PTR(Image)
 class Image{
 public:
     static ImageUPtr Load(const std::string& filepath);
+    static ImageUPtr Create(int width, int height, int channelCount = 4);
     ~Image();
 
     const uint8_t* GetData() const {
@@ -21,9 +22,12 @@ public:
     int GetChannelCount() const {
         return m_channelCount;
     }
+
+    void SetCheckImage(int gridx, int gridY);
 private:
     Image() {};
     bool LoadWithStb(const std::string& filepath);
+    bool Allocatie(int width, int geight, int channelCount);
     int m_width{0};
     int m_height{0};
     int m_channelCount {0};
