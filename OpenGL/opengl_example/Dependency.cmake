@@ -63,3 +63,20 @@ ExternalProject_Add(
 )
 
 set(DEP_LIST ${DEP_LIST} dep_stb)
+
+ExternalProject_Add(
+    dep_glm
+    GIT_REPOSITORY "https://github.com/g-truc/glm.git"
+    GIT_TAG "1.0.1"
+    GIT_SHALLOW 1
+    UPDATE_COMMAND "" 
+    PATCH_COMMAND "" 
+    TEST_COMMAND ""
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${PROJECT_BINARY_DIR}/dep_glm-prefix/src/dep_glm/glm 
+        ${DEP_INSTALL_DIR}/include/glm
+)
+
+set(DEP_LIST ${DEP_LIST} dep_glm)
