@@ -76,6 +76,14 @@ bool Context::Init(){
     m_program->Use();
     glUniform1i(glGetUniformLocation(m_program->Get(), "tex"),0);
     glUniform1i(glGetUniformLocation(m_program->Get(), "tex2"),1);
+
+    glm::vec4 vec(1.0f, 0.0f,0.0f,1.0f);
+    auto trans = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f,1.0f,0.0f));
+    auto rot = glm::rotate(glm::mat4(1.0f),
+        glm::radians(90.0f), glm::vec3(0.0f,0.0f,1.0f));
+    auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(3.0f));
+    vec = trans*rot*scale * vec;
+    SPDLOG_INFO("transformed vec: [{}, {}, {}]" , vec.x, vec.y, vec.z);
     return true;
 }
 
