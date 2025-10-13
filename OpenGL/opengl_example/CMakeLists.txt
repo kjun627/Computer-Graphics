@@ -9,6 +9,14 @@ set(WINDOW_WIDTH 960)
 set(WINDOW_HEIGHT 540)
 
 project(${PROJECT_NAME})
+
+if(MSVC)
+    add_compile_options(/utf-8)
+    add_compile_options(/W3)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+    add_compile_definitions(_UNICODE UNICODE)
+endif()
+
 add_executable(${PROJECT_NAME} 
     src/main.cpp
     src/glad.c
@@ -17,7 +25,7 @@ add_executable(${PROJECT_NAME}
     src/program.cpp src/program.h
     src/context.cpp src/context.h
     src/buffer.cpp src/buffer.h
-    src/vertex_layout.cpp src/buffer.h
+    src/vertex_layout.cpp src/vertex_layout.h
     src/image.cpp src/image.h
     src/texture.h src/texture.cpp
 )
