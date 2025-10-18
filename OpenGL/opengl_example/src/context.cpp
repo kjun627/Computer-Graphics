@@ -103,9 +103,9 @@ bool Context::Init(){
     glBindTexture(GL_TEXTURE_2D, m_texture2->Get());
 
     m_program->Use();
-    glUniform1i(glGetUniformLocation(m_program->Get(), "tex"),0);
-    glUniform1i(glGetUniformLocation(m_program->Get(), "tex2"),1);
-
+    m_program->SetUniform("tex", 0);
+    m_program->SetUniform("tex2", 1);
+    
     // x 축 기준 -55도 회전
     auto model = glm::rotate(glm::mat4(1.0f), glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     // 카메라는 원점에서 z 축 방향으로 -3만큼
@@ -115,7 +115,7 @@ bool Context::Init(){
     
     auto transform = projection * view * model;
     auto transformLoc = glGetUniformLocation(m_program->Get(), "transform");
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+    m_program->SetUniform("transform", transform);
 
     return true;
 }
@@ -123,7 +123,7 @@ bool Context::Init(){
 void Context::Render(){
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
-    
+
     m_program->Use();
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 }
