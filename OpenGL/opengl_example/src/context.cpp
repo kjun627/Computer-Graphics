@@ -139,8 +139,11 @@ void Context::Render(){
     m_program->Use();
     auto projection = glm::perspective(glm::radians(45.0f), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.01f, 20.0f);
     
-    float x = sinf((float)glfwGetTime() * glm::pi<float>() * 2.0f) * 3.0f;
-    auto cameraPos = glm::vec3(x, 0.0f, 3.0f);
+    float angle =(float)glfwGetTime() * glm::pi<float>() * 0.5f;
+    auto x = sinf(angle) * 10.0f;
+    auto z = cosf(angle) * 10.0f;
+
+    auto cameraPos = glm::vec3(x, 0.0f, z);
     auto cameraTarget = glm::vec3(0.0f,0.0f,0.0f);
     auto cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
