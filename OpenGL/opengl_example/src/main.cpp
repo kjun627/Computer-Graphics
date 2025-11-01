@@ -5,6 +5,7 @@
 
 void OnFramebufferSizeChange(GLFWwindow* window, int width, int height) {
     SPDLOG_INFO("framebuffer size changed: ({} x {})", width, height);
+    auto context = reinterpret_cast<Context*>(glfwGetWindowUserPointer(window));
     glViewport(0, 0, width, height);
 }
 
@@ -69,6 +70,8 @@ int main(int argc , const char** argv){
         glfwTerminate();
         return -1;
     }
+    glfwSetWindowUserPointer(window, context.get());
+    
     ShaderPtr vertexShader = Shader::CreateFromFile("./shader/simple.vs", GL_VERTEX_SHADER);
     ShaderPtr fragmentShader = Shader::CreateFromFile("./shader/simple.fs", GL_FRAGMENT_SHADER);
     SPDLOG_INFO("vertex shader id: {}", vertexShader->Get());
