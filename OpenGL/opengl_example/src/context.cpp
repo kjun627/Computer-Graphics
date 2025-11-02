@@ -168,8 +168,20 @@ bool Context::Init(){
 }
 
 void Context::Render(){
-    if (ImGui::Begin("imgui text")){
-        ImGui::Text("test.test");
+    if (ImGui::Begin("UI Window")){
+        if(ImGui::ColorEdit4("clear color", glm::value_ptr(m_clearColor))){
+            glClearColor(m_clearColor.x,m_clearColor.y,m_clearColor.z, m_clearColor.w);
+        }
+        ImGui::Separator();
+        ImGui::DragFloat3("Camera pos", glm::value_ptr(m_cameraPos), 0.01f);
+        ImGui::DragFloat3("Camera Yaw", &m_cameraYaw, 0.5f);
+        ImGui::DragFloat3("Camera Pitch", &m_cameraPitch, 0.5f, -89.0f, 89.0f);
+        ImGui::Separator();
+        if(ImGui::Button("reset camera")){
+            m_cameraYaw = 0.0f;
+            m_cameraPitch = 0.0f;
+            m_cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+        }
     }
     ImGui::End();
     std::vector<glm::vec3> cubePositions = {

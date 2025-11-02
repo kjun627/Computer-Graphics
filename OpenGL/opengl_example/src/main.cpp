@@ -41,6 +41,14 @@ void OnMouseButton (GLFWwindow* window, int button, int action, int modifier){
     context->MouseButton(button, action, x,y);
 }
 
+void OnCharEvent(GLFWwindow* window, unsigned int ch){
+    ImGui_ImplGlfw_CharCallback(window, ch);
+}
+
+void OnScroll(GLFWwindow* window, double xoffset, double yoffset){
+    ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
+}
+
 int main(int argc , const char** argv){
     SPDLOG_INFO("start program");
     
@@ -109,10 +117,12 @@ int main(int argc , const char** argv){
     // 당연하게도 opengl 이 로드가 된 이후에 glfw 를 사용하면서 window 크기에 대한 event 수집
     glfwSetFramebufferSizeCallback(window, OnFramebufferSizeChange);
     glfwSetKeyCallback(window, OnKeyEvent);
+    glfwSetCharCallback(window, OnCharEvent);
     // glfw 루프 실행, 윈도우 close 버튼을 누르면 정상 종료
     glfwSetCursorPosCallback(window, OnCursorPos);
     glfwSetMouseButtonCallback(window, OnMouseButton);
-
+    glfwSetScrollCallback(window, OnScroll);
+    
     SPDLOG_INFO("Start main loop");
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
