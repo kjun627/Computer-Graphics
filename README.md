@@ -1,6 +1,6 @@
 # Computer Graphics
 
-A repository for learning 3D graphics programming with OpenGL, and DirectX11.
+A repository for learning 3D graphics programming with OpenGL and DirectX11.
 
 ## Overview
 
