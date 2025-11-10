@@ -125,8 +125,10 @@ bool Context::Init(){
     m_indexBuffer = Buffer::CreateWithData(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW,
     indices, sizeof(indices));
 
-    ShaderPtr vertShader = Shader::CreateFromFile("./shader/texture.vs", GL_VERTEX_SHADER);
-    ShaderPtr fragShader = Shader::CreateFromFile("./shader/texture.fs", GL_FRAGMENT_SHADER);
+    // ShaderPtr vertShader = Shader::CreateFromFile("./shader/texture.vs", GL_VERTEX_SHADER);
+    // ShaderPtr fragShader = Shader::CreateFromFile("./shader/texture.fs", GL_FRAGMENT_SHADER);
+    ShaderPtr vertShader = Shader::CreateFromFile("./shader/lighting.vs", GL_VERTEX_SHADER);
+    ShaderPtr fragShader = Shader::CreateFromFile("./shader/lighting.fs", GL_FRAGMENT_SHADER);
     if(!vertShader || !fragShader){
         return false;
     }
@@ -169,6 +171,11 @@ bool Context::Init(){
 
 void Context::Render(){
     if (ImGui::Begin("UI Window")){
+        if(ImGui::CollapsingHeader("light")){
+            ImGui::ColorEdit3("light color", glm::value_ptr(m_lightColor));
+            ImGui::ColorEdit3("object color", glm::value_ptr(m_objectColor));
+            ImGui::SliderFloat("ambient strength", &m_abientStrength, 0.0f, 1.0f);
+        }
         if(ImGui::ColorEdit4("clear color", glm::value_ptr(m_clearColor))){
             glClearColor(m_clearColor.x,m_clearColor.y,m_clearColor.z, m_clearColor.w);
         }
@@ -201,6 +208,9 @@ void Context::Render(){
     glEnable(GL_DEPTH_TEST);
     
     m_program->Use();
+    m_program->SetUniform("lightColor", m_lightColor);
+    m_program->SetUniform("objectColor", m_objectColor);
+    m_program->SetUniform("ambientStrength", m_abientStrength);
     m_cameraFront = 
         glm::rotate(glm::mat4(1.0f), glm::radians(m_cameraYaw), glm::vec3(0.0f,1.0f, 0.0f)) *
         glm::rotate(glm::mat4(1.0f), glm::radians(m_cameraPitch), glm::vec3(1.0f, 0.0f, 0.0f))* 
