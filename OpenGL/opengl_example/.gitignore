@@ -2,3 +2,6 @@ build/
 .vscode/
 src/tempCodeRunnerFile.cpp
 .DS_Store
+info.plist
+imgui.ini
+/Users/junhyung/Desktop/Computer-Graphics/OpenGL/.DS_Store

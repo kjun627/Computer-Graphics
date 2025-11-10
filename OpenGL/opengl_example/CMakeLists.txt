@@ -44,6 +44,16 @@ if(APPLE)
         ${COREVIDEO_LIBRARY}
         ${COREFOUNDATION_LIBRARY}
     )
+    
+    # macOS Bundle 설정
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        MACOSX_BUNDLE TRUE
+        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/Info.plist
+        MACOSX_BUNDLE_BUNDLE_NAME "OpenGL Example"
+        MACOSX_BUNDLE_IDENTIFIER "com.example.opengl_example"
+        MACOSX_BUNDLE_VERSION "1.0"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0"
+    )
 endif()
 
 # 프로젝트에 include / lib 관련 옵션 추가
