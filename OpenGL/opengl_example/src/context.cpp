@@ -243,10 +243,9 @@ void Context::Render(){
     {
         auto& pos = cubePositions[i];
         auto model = glm::translate(glm::mat4(1.0f), pos);
-        auto angle = glm::radians((float)glfwGetTime() * 120.0f + 20.0f*(float)i);
+        auto angle = glm::radians((m_animation?  (float)glfwGetTime() : 0.0f) * 120.0f + 20.0f*(float)i);
         model = glm::rotate(model, 
-            m_animation ? angle : 0.0f,
-            glm::vec3(1.0f, 0.5f,0.0f));
+            angle, glm::vec3(1.0f, 0.5f,0.0f));
         auto transform = projection * view * model;
         m_program->SetUniform("transform", transform);
         m_program->SetUniform("modelTransform", model);
