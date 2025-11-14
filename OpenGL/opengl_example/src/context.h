@@ -21,6 +21,7 @@ private:
     Context(){}
     bool Init();
     ProgramUPtr m_program;
+    ProgramUPtr m_simpleProgram;
 
     VertexLayoutUPtr m_vertexLayout;
     BufferUPtr m_vertexBuffer;
@@ -44,8 +45,7 @@ private:
     Light m_light;
 
     struct Meterial {
-        glm::vec3 ambient {glm::vec3(1.0f, 0.5f, 0.3f)};
-        glm::vec3 diffuse {glm::vec3(1.0f, 0.5f, 0.3f)};
+        TextureUPtr diffuse;
         glm::vec3 specular {glm::vec3(0.5f, 0.5f, 0.5f)};
         float shininess {32.0f};
     };

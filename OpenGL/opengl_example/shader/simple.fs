@@ -1,7 +1,7 @@
 #version 330 core
-in vec4 glcolor;
+uniform vec4 color;
 out vec4 fragColor;
 
 void main() {
-  fragColor = glcolor;
+  fragColor = color;
 }
