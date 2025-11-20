@@ -167,10 +167,28 @@ bool Context::Init(){
     return true;
 }
 
+glm::vec3 GetAttenuationCoeff(float distance){
+    const auto linear_coeff = glm::vec4(
+        8.4523112e-05, 4.4712582e+00, -1.8516388e+00, 3.3955811e+01
+    );
+    const auto quad_coeff = glm::vec4(
+    -7.6103583e-04, 9.0120201e+00, -1.1618500e+01, 1.0000464e+02
+    );
+
+    float kc = 1.0f;
+    float d = 1.0f / distance;
+    auto dvec = glm::vec4(1.0f, d, d*d, d*d*d);
+    float kl = glm::dot(linear_coeff, dvec);
+    float kq = glm::dot(quad_coeff, dvec);
+
+    return glm::vec3(kc, glm::max(kl, 0.0f), glm::max(kq*kq,0.0f));
+}
+
 void Context::Render(){
     if (ImGui::Begin("UI Window")){
         if(ImGui::CollapsingHeader("light", ImGuiTreeNodeFlags_DefaultOpen)){
-            ImGui::DragFloat3("l.direction", glm::value_ptr(m_light.direction),0.01f);
+            ImGui::DragFloat3("l.position", glm::value_ptr(m_light.position), 0.01f);
+            ImGui::DragFloat("l.distance", &m_light.distance, 0.5f, 0.0f, 3000.0f);
             ImGui::ColorEdit3("l.ambient", glm::value_ptr(m_light.ambient));
             ImGui::ColorEdit3("l.diffuse", glm::value_ptr(m_light.diffuse));
             ImGui::ColorEdit3("lmspecular", glm::value_ptr(m_light.specular));
@@ -237,7 +255,9 @@ void Context::Render(){
 
     m_program->Use();
     m_program->SetUniform("viewPos", m_cameraPos);
-    m_program->SetUniform("light.direction", m_light.direction);
+    m_program->SetUniform("light.position", m_light.position);
+    m_program->SetUniform("light.attenuation",
+        GetAttenuationCoeff(m_light.distance));
     m_program->SetUniform("light.diffuse", m_light.diffuse);
     m_program->SetUniform("light.ambient", m_light.ambient);
     m_program->SetUniform("light.specular", m_light.specular);
