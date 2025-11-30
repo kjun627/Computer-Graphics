@@ -189,6 +189,7 @@ void Context::Render(){
         if(ImGui::CollapsingHeader("light", ImGuiTreeNodeFlags_DefaultOpen)){
             ImGui::DragFloat3("l.position", glm::value_ptr(m_light.position), 0.01f);
             ImGui::DragFloat("l.distance", &m_light.distance, 0.5f, 0.0f, 3000.0f);
+            ImGui::DragFloat2("l.cutoff",glm::value_ptr(m_light.cutoff), 0.5f, 0.0f, 90.0f);
             ImGui::ColorEdit3("l.ambient", glm::value_ptr(m_light.ambient));
             ImGui::ColorEdit3("l.diffuse", glm::value_ptr(m_light.diffuse));
             ImGui::ColorEdit3("lmspecular", glm::value_ptr(m_light.specular));
