@@ -237,6 +237,8 @@ void Context::Render(){
         glm::vec4(0.0f, 0.0f, -1.0f, 0.0f); 
         // homo coordi 인데 last value가 1이 아닌이유? -> 마지막이 0이면 vector , 1이면 점이 됨.
         // 그러면서 평행이동이 안된다.
+    m_light.position = m_cameraPos;
+    m_light.direction = m_cameraFront;
 
     auto projection = glm::perspective(glm::radians(45.0f), (float)m_width / (float)m_height, 0.01f, 20.0f);
     auto view = glm::lookAt(
@@ -244,14 +246,15 @@ void Context::Render(){
         m_cameraPos + m_cameraFront,
         m_cameraUp
     );
-    auto lightModelTransform =
-    glm::translate(glm::mat4(1.0), m_light.position) *
-    glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
+
+    // auto lightModelTransform =
+    // glm::translate(glm::mat4(1.0), m_light.position) *
+    // glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
     
-    m_simpleProgram->Use();
-    m_simpleProgram->SetUniform("color", glm::vec4(m_light.ambient + m_light.diffuse, 1.0f));
-    m_simpleProgram->SetUniform("transform", projection * view * lightModelTransform);
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT,0);
+    // m_simpleProgram->Use();
+    // m_simpleProgram->SetUniform("color", glm::vec4(m_light.ambient + m_light.diffuse, 1.0f));
+    // m_simpleProgram->SetUniform("transform", projection * view * lightModelTransform);
+    // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT,0);
 
     m_program->Use();
     m_program->SetUniform("viewPos", m_cameraPos);
