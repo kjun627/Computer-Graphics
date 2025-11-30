@@ -7,6 +7,7 @@
 #include "buffer.h"
 #include "vertex_layout.h"
 #include "texture.h"
+#include "mesh.h"
 CLASS_PTR(Context)
 class Context{
 public:
@@ -22,6 +23,8 @@ private:
     bool Init();
     ProgramUPtr m_program;
     ProgramUPtr m_simpleProgram;
+
+    MeshUPtr m_box;
 
     VertexLayoutUPtr m_vertexLayout;
     BufferUPtr m_vertexBuffer;

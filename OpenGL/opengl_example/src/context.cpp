@@ -68,65 +68,7 @@ void Context::MouseButton(int button, int action, double x, double y){
 }
 
 bool Context::Init(){
-    // pos.xyz, normal.xyz, texcoord.uv
-    float vertices[] = { 
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
-        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f,
-
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
-        0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f,
-
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
-
-        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f,
-        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,
-    };
-    uint32_t indices[] = {
-        0,  2,  1,  2,  0,  3,
-        4,  5,  6,  6,  7,  4,
-        8,  9, 10, 10, 11,  8,
-        12, 14, 13, 14, 12, 15,
-        16, 17, 18, 18, 19, 16,
-        20, 22, 21, 22, 20, 23,
-    };
-    
-
-    //vertex layout 을 활용
-    m_vertexLayout = VertexLayout::Create();
-    // buffer class 를 활용한 buffer gen -> binding 과정
-    m_vertexBuffer = Buffer::CreateWithData(GL_ARRAY_BUFFER, GL_STATIC_DRAW,
-    vertices,  sizeof(vertices));
-
-    //vertex layout 을 활용
-    m_vertexLayout->SetAttrib(0,3,GL_FLOAT, GL_FALSE, sizeof(float)*8, 0);
-    m_vertexLayout->SetAttrib(1,3, GL_FLOAT,GL_FALSE, sizeof(float)*8, sizeof(float)*3);
-    m_vertexLayout->SetAttrib(2,2, GL_FLOAT, GL_FALSE, sizeof(float)*8, sizeof(float)*6);
-
-
-    // buffer class 를 활용한 buffer gen -> binding 과정
-    m_indexBuffer = Buffer::CreateWithData(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW,
-    indices, sizeof(indices));
-
-
+    m_box = Mesh::CreateBox();
     m_simpleProgram = Program::Create("./shader/simple.vs", "./shader/simple.fs");
     if (!m_simpleProgram) return false;
     SPDLOG_INFO("Simple program id: {}", m_simpleProgram->Get());
@@ -238,8 +180,6 @@ void Context::Render(){
         glm::vec4(0.0f, 0.0f, -1.0f, 0.0f); 
         // homo coordi 인데 last value가 1이 아닌이유? -> 마지막이 0이면 vector , 1이면 점이 됨.
         // 그러면서 평행이동이 안된다.
-    m_light.position = m_cameraPos;
-    m_light.direction = m_cameraFront;
 
     auto projection = glm::perspective(glm::radians(45.0f), (float)m_width / (float)m_height, 0.01f, 20.0f);
     auto view = glm::lookAt(
@@ -248,14 +188,15 @@ void Context::Render(){
         m_cameraUp
     );
 
-    // auto lightModelTransform =
-    // glm::translate(glm::mat4(1.0), m_light.position) *
-    // glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
+    auto lightModelTransform =
+    glm::translate(glm::mat4(1.0), m_light.position) *
+    glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
     
-    // m_simpleProgram->Use();
-    // m_simpleProgram->SetUniform("color", glm::vec4(m_light.ambient + m_light.diffuse, 1.0f));
-    // m_simpleProgram->SetUniform("transform", projection * view * lightModelTransform);
-    // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT,0);
+    m_simpleProgram->Use();
+    m_simpleProgram->SetUniform("color", glm::vec4(m_light.ambient + m_light.diffuse, 1.0f));
+    m_simpleProgram->SetUniform("transform", projection * view * lightModelTransform);
+    m_box->Draw();
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT,0);
 
     m_program->Use();
     m_program->SetUniform("viewPos", m_cameraPos);
