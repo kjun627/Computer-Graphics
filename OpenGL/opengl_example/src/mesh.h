@@ -12,6 +12,7 @@ struct Vertex {
     glm::vec2 texCoord;
 };
 
+CLASS_PTR(Program);
 CLASS_PTR(Material);
 class Material{
     public:
@@ -22,6 +23,7 @@ class Material{
     TexturePtr specular;
     float shininess { 32.0f };
 
+    void SetToProgram(const Program* program) const;
     private:
     Material() {}
 };
@@ -41,8 +43,9 @@ public:
     }
     BufferPtr GetVertexBuffer () const {return m_vertexBuffer;}
     BufferPtr GetIndexbuffer () const {return m_indexBuffer;}
-
-    void Draw() const;
+    void SetMaterial(MaterialPtr material) { m_material = material;}
+    MaterialPtr GetMaterial() const {return m_material;}
+    void Draw(const Program* program) const;
 
 private:
     Mesh () {}
@@ -56,6 +59,7 @@ private:
     VertexLayoutUPtr m_vertexLayout;
     BufferPtr m_vertexBuffer;
     BufferPtr m_indexBuffer;
+    MaterialPtr m_material;
 };
 
 #endif
