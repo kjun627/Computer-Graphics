@@ -192,9 +192,9 @@ void Context::Render(){
     m_simpleProgram->Use();
     m_simpleProgram->SetUniform("color", glm::vec4(m_light.ambient + m_light.diffuse, 1.0f));
     m_simpleProgram->SetUniform("transform", projection * view * lightModelTransform);
-    
-
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT,0);
+    m_box->Draw(m_simpleProgram.get());
+
     m_program->Use();
     m_program->SetUniform("viewPos", m_cameraPos);
     m_program->SetUniform("light.position", m_light.position);
