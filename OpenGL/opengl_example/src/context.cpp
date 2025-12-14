@@ -69,6 +69,10 @@ void Context::MouseButton(int button, int action, double x, double y){
 
 bool Context::Init(){
     m_box = Mesh::CreateBox();
+
+    m_model = Model::Load("./model/backpack.obj");
+    if(!m_model) return false;
+
     m_simpleProgram = Program::Create("./shader/simple.vs", "./shader/simple.fs");
     if (!m_simpleProgram) return false;
     SPDLOG_INFO("Simple program id: {}", m_simpleProgram->Get());
@@ -94,8 +98,14 @@ bool Context::Init(){
         image2->GetWidth(), image2->GetHight(), image2->GetChannelCount());
     m_texture2 = Texture::CreateFromImage(image2.get());
 
-    m_material.diffuse = Texture::CreateFromImage(Image::Load("./IMG_sample/container2.png").get());
-    
+    // m_material.diffuse = Texture::CreateFromImage(Image::Load("./IMG_sample/container2.png").get());
+    m_material.diffuse = Texture::CreateFromImage(
+        Image::CreateSingleColorImage(4, 4,
+        glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)).get());
+            
+    m_material.specular = Texture::CreateFromImage(
+        Image::CreateSingleColorImage(4, 4,
+        glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)).get());
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_texture->Get());
@@ -138,8 +148,7 @@ void Context::Render(){
         }
 
         if(ImGui::CollapsingHeader("material", ImGuiTreeNodeFlags_DefaultOpen)){   
-            
-            ImGui::ColorEdit3("m.specular", glm::value_ptr(m_material.specular));
+            // ImGui::ColorEdit3("m.specular", glm::value_ptr(m_material.specular));
             ImGui::DragFloat("m.shininess", &m_material.shininess, 1.0f, 1.0f, 256.0f);
         }
         ImGui::Checkbox("animation", &m_animation);
@@ -158,18 +167,6 @@ void Context::Render(){
         }
     }
     ImGui::End();
-    std::vector<glm::vec3> cubePositions = {
-        glm::vec3( 0.0f, 0.0f, 0.0f),
-        glm::vec3( 2.0f, 5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3( 2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f, 3.0f, -7.5f),
-        glm::vec3( 1.3f, -2.0f, -2.5f),
-        glm::vec3( 1.5f, 2.0f, -2.5f),
-        glm::vec3( 1.5f, 0.2f, -1.5f),
-        glm::vec3(-1.3f, 1.0f, -1.5f),
-    };
 
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
@@ -196,36 +193,31 @@ void Context::Render(){
     m_simpleProgram->SetUniform("color", glm::vec4(m_light.ambient + m_light.diffuse, 1.0f));
     m_simpleProgram->SetUniform("transform", projection * view * lightModelTransform);
     m_box->Draw();
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT,0);
 
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT,0);
     m_program->Use();
     m_program->SetUniform("viewPos", m_cameraPos);
     m_program->SetUniform("light.position", m_light.position);
     m_program->SetUniform("light.direction", m_light.direction);
     m_program->SetUniform("light.cutoff", glm::vec2(
-        cosf(glm::radians(m_light.cutoff[0])),
-        cosf(glm::radians(m_light.cutoff[0] + m_light.cutoff[1]))));
-    m_program->SetUniform("light.attenuation",
-        GetAttenuationCoeff(m_light.distance));
-    m_program->SetUniform("light.diffuse", m_light.diffuse);
+    cosf(glm::radians(m_light.cutoff[0])),
+    cosf(glm::radians(m_light.cutoff[0] + m_light.cutoff[1]))));
+    m_program->SetUniform("light.attenuation", GetAttenuationCoeff(m_light.distance));
     m_program->SetUniform("light.ambient", m_light.ambient);
+    m_program->SetUniform("light.diffuse", m_light.diffuse);
     m_program->SetUniform("light.specular", m_light.specular);
+
     m_program->SetUniform("material.diffuse", 0);
-    m_program->SetUniform("material.specular", m_material.specular);
+    m_program->SetUniform("material.specular", 1);
     m_program->SetUniform("material.shininess", m_material.shininess);
-    
     glActiveTexture(GL_TEXTURE0);
     m_material.diffuse->Bind();
-    for (size_t i = 0; i <cubePositions.size(); i++)
-    {
-        auto& pos = cubePositions[i];
-        auto model = glm::translate(glm::mat4(1.0f), pos);
-        auto angle = glm::radians((m_animation?  (float)glfwGetTime() : 0.0f) * 120.0f + 20.0f*(float)i);
-        model = glm::rotate(model, 
-            angle, glm::vec3(1.0f, 0.5f,0.0f));
-        auto transform = projection * view * model;
-        m_program->SetUniform("transform", transform);
-        m_program->SetUniform("modelTransform", model);
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-    }
+    glActiveTexture(GL_TEXTURE1);
+    m_material.specular->Bind();
+
+    auto modelTransform = glm::mat4(1.0f);
+    auto transform = projection * view * modelTransform;
+    m_program->SetUniform("transform", transform);
+    m_program->SetUniform("modelTransform", modelTransform);
+    m_model->Draw();
 }

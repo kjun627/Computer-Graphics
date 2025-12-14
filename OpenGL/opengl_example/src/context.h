@@ -8,6 +8,7 @@
 #include "vertex_layout.h"
 #include "texture.h"
 #include "mesh.h"
+#include "model.h"
 CLASS_PTR(Context)
 class Context{
 public:
@@ -25,6 +26,7 @@ private:
     ProgramUPtr m_simpleProgram;
 
     MeshUPtr m_box;
+    ModelUPtr m_model;
 
     VertexLayoutUPtr m_vertexLayout;
     BufferUPtr m_vertexBuffer;
@@ -52,7 +54,7 @@ private:
 
     struct Meterial {
         TextureUPtr diffuse;
-        glm::vec3 specular {glm::vec3(0.5f, 0.5f, 0.5f)};
+        TextureUPtr specular;
         float shininess {32.0f};
     };
     Meterial m_material;

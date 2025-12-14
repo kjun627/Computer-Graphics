@@ -4,11 +4,26 @@
 #include "common.h"
 #include "buffer.h"
 #include "vertex_layout.h"
+#include "texture.h"
 
 struct Vertex {
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec2 texCoord;
+};
+
+CLASS_PTR(Material);
+class Material{
+    public:
+    static MaterialUPtr Create() {
+        return MaterialUPtr(new Material());
+    }
+    TexturePtr diffuse;
+    TexturePtr specular;
+    float shininess { 32.0f };
+
+    private:
+    Material() {}
 };
 
 CLASS_PTR(Mesh);
