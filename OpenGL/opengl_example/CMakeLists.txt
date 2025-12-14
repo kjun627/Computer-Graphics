@@ -29,6 +29,7 @@ add_executable(${PROJECT_NAME}
     src/image.cpp src/image.h
     src/texture.h src/texture.cpp
     src/mesh.h src/mesh.cpp
+    src/model.h src/model.cpp
 )
 include(Dependency.cmake)
 
