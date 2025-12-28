@@ -167,7 +167,11 @@ void Context::Render(){
     ImGui::End();
 
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST); // depth Test 사용하는 방법
+    //glDisable(GL_DEPTH_TEST); // Depth Test 사용 안하는 방법
+    // depth test를 사용하지 않는 대표 예시 -> IMGUI , Depth test 는 기본값이 false
+    // glDepthMask(GL_FALSE); -> depth 값 업데이트 안하는 방법
+    // glClearDepth(1.0f) // depth test 초기값 설정하기 -> depth buffer에서는 가장 먼 값이 1
     
     m_cameraFront = 
         glm::rotate(glm::mat4(1.0f), glm::radians(m_cameraYaw), glm::vec3(0.0f,1.0f, 0.0f)) *
