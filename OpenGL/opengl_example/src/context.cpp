@@ -180,7 +180,7 @@ void Context::Render(){
         // homo coordi 인데 last value가 1이 아닌이유? -> 마지막이 0이면 vector , 1이면 점이 됨.
         // 그러면서 평행이동이 안된다.
 
-    auto projection = glm::perspective(glm::radians(45.0f), (float)m_width / (float)m_height, 1.0f, 20.0f);
+    auto projection = glm::perspective(glm::radians(45.0f), (float)m_width / (float)m_height, 0.01f, 1000.0f);
     auto view = glm::lookAt(
         m_cameraPos,
         m_cameraPos + m_cameraFront,
@@ -229,7 +229,7 @@ void Context::Render(){
     m_box->Draw(m_program.get());
 
     modelTransform =
-        glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.75f, 2.0f)) *
+        glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.749f, 2.0f)) *
         glm::rotate(glm::mat4(1.0f), glm::radians(20.0f), glm::vec3(0.0f, 1.0f, 0.0f)) *
         glm::scale(glm::mat4(1.0f), glm::vec3(1.5f, 1.5f, 1.5f));
     transform = projection * view * modelTransform;
